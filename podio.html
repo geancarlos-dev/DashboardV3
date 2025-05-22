@@ -158,28 +158,28 @@
         
         /* Alturas dos degraus do pódio */
         .first-place {
-            height: 320px;
+            height: 400px;
         }
         
         .second-place {
-            height: 250px;
+            height: 320px;
         }
         
         .third-place {
-            height: 200px;
+            height: 280px;
         }
         
         /* Larguras dos degraus do pódio */
         .first-place .podium-platform {
-            width: 180px;
+            width: 220px;
         }
         
         .second-place .podium-platform {
-            width: 160px;
+            width: 180px;
         }
         
         .third-place .podium-platform {
-            width: 140px;
+            width: 160px;
         }
         
         /* Bases do pódio */
@@ -195,17 +195,17 @@
         }
         
         .first-place .podium-base {
-            height: 50px;
+            height: 60px;
             background-color: #FFD700;
         }
         
         .second-place .podium-base {
-            height: 50px;
+            height: 60px;
             background-color: #C0C0C0;
         }
         
         .third-place .podium-base {
-            height: 50px;
+            height: 60px;
             background-color: #CD7F32;
         }
         
@@ -271,6 +271,149 @@
             overflow: hidden;
             z-index: 10;
         }
+
+        /* Carrossel de outros pódios */
+        .other-podiums-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 40px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .other-podiums-carousel {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .other-podium-item {
+            min-width: 100%;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .other-podium {
+            width: 300px;
+            height: 250px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            color: white;
+            padding: 20px;
+        }
+
+        .other-podium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .other-podium-position {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .other-podium-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .other-podium-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .other-podium-count {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .carousel-dot.active {
+            background-color: #4f46e5;
+        }
+
+        /* Cores alternativas para os outros pódios */
+        .podium-purple {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        .podium-blue {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .podium-teal {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        }
+
+        .podium-pink {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+        }
+
+        .podium-orange {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        }
+
+        /* Timer de atualização */
+        .update-timer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4f46e5;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+
+        .update-timer i {
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans min-h-screen">
@@ -322,9 +465,9 @@
                         <div class="trophy-icon">
                             <i class="fas fa-medal"></i>
                         </div>
-                        <div class="avatar w-20 h-20 mb-4" id="secondPlaceAvatar">--</div>
-                        <span class="font-bold text-gray-800 text-lg" id="secondPlaceName">--</span>
-                        <span class="text-sm text-gray-700 font-medium" id="secondPlaceCount">0 configurações</span>
+                        <div class="avatar w-24 h-24 mb-4 text-3xl" id="secondPlaceAvatar">--</div>
+                        <span class="font-bold text-gray-800 text-xl" id="secondPlaceName">--</span>
+                        <span class="text-md text-gray-700 font-medium" id="secondPlaceCount">0 configurações</span>
                     </div>
                     <div class="podium-base">
                         <span class="podium-number">2º Lugar</span>
@@ -339,9 +482,9 @@
                         <div class="trophy-icon">
                             <i class="fas fa-crown"></i>
                         </div>
-                        <div class="avatar w-24 h-24 mb-4" id="firstPlaceAvatar">--</div>
-                        <span class="font-bold text-gray-800 text-xl" id="firstPlaceName">--</span>
-                        <span class="text-md text-gray-700 font-medium" id="firstPlaceCount">0 configurações</span>
+                        <div class="avatar w-28 h-28 mb-4 text-4xl" id="firstPlaceAvatar">--</div>
+                        <span class="font-bold text-gray-800 text-2xl" id="firstPlaceName">--</span>
+                        <span class="text-lg text-gray-700 font-medium" id="firstPlaceCount">0 configurações</span>
                     </div>
                     <div class="podium-base">
                         <span class="podium-number">1º Lugar</span>
@@ -356,13 +499,31 @@
                         <div class="trophy-icon">
                             <i class="fas fa-award"></i>
                         </div>
-                        <div class="avatar w-16 h-16 mb-3" id="thirdPlaceAvatar">--</div>
-                        <span class="font-bold text-gray-800 text-md" id="thirdPlaceName">--</span>
-                        <span class="text-xs text-gray-700 font-medium" id="thirdPlaceCount">0 configurações</span>
+                        <div class="avatar w-20 h-20 mb-3 text-2xl" id="thirdPlaceAvatar">--</div>
+                        <span class="font-bold text-gray-800 text-lg" id="thirdPlaceName">--</span>
+                        <span class="text-sm text-gray-700 font-medium" id="thirdPlaceCount">0 configurações</span>
                     </div>
                     <div class="podium-base">
                         <span class="podium-number">3º Lugar</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- Carrossel de outros pódios -->
+            <div id="otherPodiumsSection" class="hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Outros Destaques</h2>
+                    <p class="text-gray-600">Técnicos que também se destacaram</p>
+                </div>
+                
+                <div class="other-podiums-container">
+                    <div class="other-podiums-carousel" id="otherPodiumsCarousel">
+                        <!-- Itens serão adicionados dinamicamente -->
+                    </div>
+                </div>
+                
+                <div class="carousel-nav" id="carouselNav">
+                    <!-- Pontos de navegação serão adicionados dinamicamente -->
                 </div>
             </div>
 
@@ -400,6 +561,12 @@
             </button>
         </div>
     </main>
+
+    <!-- Timer de atualização -->
+    <div id="updateTimer" class="update-timer hidden">
+        <i class="fas fa-clock"></i>
+        <span id="timerText">Próxima atualização em 5:00</span>
+    </div>
 
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
@@ -456,13 +623,23 @@
                 password: document.getElementById('password'),
                 firstPlaceContainer: document.getElementById('firstPlaceContainer'),
                 secondPlaceContainer: document.getElementById('secondPlaceContainer'),
-                thirdPlaceContainer: document.getElementById('thirdPlaceContainer')
+                thirdPlaceContainer: document.getElementById('thirdPlaceContainer'),
+                otherPodiumsSection: document.getElementById('otherPodiumsSection'),
+                otherPodiumsCarousel: document.getElementById('otherPodiumsCarousel'),
+                carouselNav: document.getElementById('carouselNav'),
+                updateTimer: document.getElementById('updateTimer'),
+                timerText: document.getElementById('timerText')
             };
 
             // Application State
             const state = {
                 googleSheetsUrl: '',
-                techniciansData: []
+                techniciansData: [],
+                currentCarouselIndex: 0,
+                carouselInterval: null,
+                updateInterval: null,
+                updateTimerInterval: null,
+                lastUpdateTime: null
             };
 
             // Initialize Event Listeners
@@ -488,6 +665,14 @@
                 window.addEventListener('click', function(event) {
                     if (event.target === elements.loginModal) {
                         hideLoginModal();
+                    }
+                });
+
+                // Carrossel navigation dots
+                elements.carouselNav.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('carousel-dot')) {
+                        const index = Array.from(e.target.parentNode.children).indexOf(e.target);
+                        goToCarouselSlide(index);
                     }
                 });
             }
@@ -561,6 +746,119 @@
                 }, 600);
             }
 
+            // Carrossel Functions
+            function createOtherPodiumsCarousel(technicians) {
+                if (technicians.length <= 3) {
+                    elements.otherPodiumsSection.classList.add('hidden');
+                    return;
+                }
+
+                elements.otherPodiumsSection.classList.remove('hidden');
+                elements.otherPodiumsCarousel.innerHTML = '';
+                elements.carouselNav.innerHTML = '';
+
+                // Get technicians from 4th position onwards
+                const otherTechnicians = technicians.slice(3);
+
+                // Create carousel items
+                otherTechnicians.forEach((tech, index) => {
+                    // Create podium item
+                    const podiumItem = document.createElement('div');
+                    podiumItem.className = 'other-podium-item';
+                    
+                    // Determine podium color class
+                    const colorClasses = ['podium-purple', 'podium-blue', 'podium-teal', 'podium-pink', 'podium-orange'];
+                    const colorClass = colorClasses[index % colorClasses.length];
+                    
+                    podiumItem.innerHTML = `
+                        <div class="other-podium ${colorClass}">
+                            <div class="other-podium-position">${index + 4}º</div>
+                            <div class="other-podium-avatar" style="background-color: ${getRandomColor(tech.name)}">${getInitials(tech.name)}</div>
+                            <div class="other-podium-name">${tech.name}</div>
+                            <div class="other-podium-count">${tech.count} configuração${tech.count !== 1 ? 'ões' : ''}</div>
+                        </div>
+                    `;
+                    
+                    elements.otherPodiumsCarousel.appendChild(podiumItem);
+
+                    // Create navigation dot
+                    const dot = document.createElement('div');
+                    dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
+                    elements.carouselNav.appendChild(dot);
+                });
+
+                // Start carousel auto-rotation
+                startCarouselRotation();
+            }
+
+            function startCarouselRotation() {
+                // Clear any existing interval
+                if (state.carouselInterval) {
+                    clearInterval(state.carouselInterval);
+                }
+
+                // Start new interval (change every 5 seconds)
+                state.carouselInterval = setInterval(() => {
+                    const nextIndex = (state.currentCarouselIndex + 1) % (state.techniciansData.length - 3);
+                    goToCarouselSlide(nextIndex);
+                }, 5000);
+            }
+
+            function goToCarouselSlide(index) {
+                if (index < 0 || index >= (state.techniciansData.length - 3)) return;
+                
+                state.currentCarouselIndex = index;
+                elements.otherPodiumsCarousel.style.transform = `translateX(-${index * 100}%)`;
+                
+                // Update active dot
+                const dots = elements.carouselNav.querySelectorAll('.carousel-dot');
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+            }
+
+            // Auto-update Functions
+            function startAutoUpdate() {
+                // Clear any existing interval
+                if (state.updateInterval) {
+                    clearInterval(state.updateInterval);
+                }
+                if (state.updateTimerInterval) {
+                    clearInterval(state.updateTimerInterval);
+                }
+
+                // Show timer
+                elements.updateTimer.classList.remove('hidden');
+                
+                // Set initial timer
+                updateTimerDisplay(5 * 60); // 5 minutes in seconds
+                
+                // Start timer countdown
+                let secondsLeft = 5 * 60;
+                state.updateTimerInterval = setInterval(() => {
+                    secondsLeft--;
+                    updateTimerDisplay(secondsLeft);
+                    
+                    if (secondsLeft <= 0) {
+                        clearInterval(state.updateTimerInterval);
+                        loadData();
+                    }
+                }, 1000);
+                
+                // Set interval for next update (5 minutes)
+                state.updateInterval = setTimeout(() => {
+                    loadData();
+                }, 5 * 60 * 1000);
+                
+                state.lastUpdateTime = new Date();
+            }
+
+            function updateTimerDisplay(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                elements.timerText.textContent = `Próxima atualização em ${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+            }
+
             // Data Processing Functions
             function loadData() {
                 if (!state.googleSheetsUrl) {
@@ -599,6 +897,9 @@
                             const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
                             processWorkbook(workbook);
                             showLoading(false);
+                            
+                            // Start auto-update after successful load
+                            startAutoUpdate();
                         })
                         .catch(error => {
                             alert(error.message);
@@ -710,6 +1011,9 @@
                     elements.thirdPlaceAvatar.textContent = getInitials(third.name);
                     elements.thirdPlaceAvatar.style.backgroundColor = getRandomColor(third.name);
                 }
+
+                // Create carousel for other podiums
+                createOtherPodiumsCarousel(state.techniciansData);
 
                 // Update full list
                 elements.techniciansList.innerHTML = '';
