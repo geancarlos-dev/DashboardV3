@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pódio dos Técnicos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        .podium-step {
+            transition: all 0.3s ease;
+        }
+        .podium-step:hover {
+            transform: translateY(-5px);
+        }
+        .avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .laurel {
+            position: absolute;
+            top: -20px;
+            width: 100%;
+            height: 40px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" fill="%23D4AF37"><path d="M20,10 Q50,20 80,10 Q50,0 20,10 Z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            position: relative;
+            animation: modalopen 0.4s;
+        }
+        @keyframes modalopen {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close-modal:hover {
+            color: #555;
+        }
+        .input-field {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-field input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .input-field input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            outline: none;
+        }
+        .input-field label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: white;
+            padding: 0 5px;
+            font-size: 14px;
+            color: #6366f1;
+        }
+        .modal-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .modal-btn:hover {
+            background-color: #4f46e5;
+        }
+        .modal-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .modal-icon {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #6366f1;
+            font-size: 40px;
+        }
+        
+        /* Ajustes para o pódio lado a lado */
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
+            height: 500px;
+            margin-bottom: 60px;
+        }
+        
+        .podium-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        
+        /* Alturas dos degraus do pódio */
+        .first-place {
+            height: 320px;
+        }
+        
+        .second-place {
+            height: 250px;
+        }
+        
+        .third-place {
+            height: 200px;
+        }
+        
+        /* Larguras dos degraus do pódio */
+        .first-place .podium-platform {
+            width: 180px;
+        }
+        
+        .second-place .podium-platform {
+            width: 160px;
+        }
+        
+        .third-place .podium-platform {
+            width: 140px;
+        }
+        
+        /* Bases do pódio */
+        .podium-base {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+        
+        .first-place .podium-base {
+            height: 50px;
+            background-color: #FFD700;
+        }
+        
+        .second-place .podium-base {
+            height: 50px;
+            background-color: #C0C0C0;
+        }
+        
+        .third-place .podium-base {
+            height: 50px;
+            background-color: #CD7F32;
+        }
+        
+        .gold-gradient {
+            background: linear-gradient(135deg, #FFD700 0%, #D4AF37 100%);
+        }
+        
+        .silver-gradient {
+            background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%);
+        }
+        
+        .bronze-gradient {
+            background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
+        }
+        
+        .podium-platform {
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .podium-platform::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: rgba(255,255,255,0.5);
+        }
+        
+        .glow {
+            box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.6);
+            animation: glow-pulse 2s infinite alternate;
+        }
+        
+        @keyframes glow-pulse {
+            from {
+                box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.4);
+            }
+            to {
+                box-shadow: 0 0 25px 10px rgba(255, 215, 0, 0.8);
+            }
+        }
+        
+        .trophy-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: rgba(255,255,255,0.7);
+            font-size: 1.5rem;
+        }
+        
+        /* Confetti container */
+        .confetti-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen">
+    <!-- Header -->
+    <header class="bg-indigo-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Pódio dos Técnicos</h1>
+            <button id="loadDataBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-md flex items-center">
+                <i class="fas fa-sync-alt mr-2"></i> 
+                <span id="loadBtnText">Carregar Dados</span>
+                <span id="loadSpinner" class="loading-spinner hidden ml-2"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto p-4">
+        <!-- Google Sheets URL Input -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">URL do Google Sheets</label>
+                    <input type="text" id="googleSheetsUrl" placeholder="Cole a URL pública do Google Sheets" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="flex items-end">
+                    <button id="loadFromUrlBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-md h-10 flex items-center">
+                        <i class="fas fa-link mr-2"></i> Carregar
+                    </button>
+                </div>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">A planilha deve conter colunas com os nomes "Tecnico" e "Configuração"</p>
+        </div>
+
+        <!-- Podium -->
+        <div id="podiumContainer" class="hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Top 3 Técnicos</h2>
+                <p class="text-gray-600">Técnicos com mais configurações realizadas</p>
+            </div>
+
+            <!-- Pódio lado a lado -->
+            <div class="podium-container">
+                <!-- 2nd Place -->
+                <div class="podium-item second-place" id="secondPlaceContainer">
+                    <div class="confetti-container" id="secondConfetti"></div>
+                    <div class="podium-platform silver-gradient relative flex flex-col items-center justify-end pb-6">
+                        <div class="laurel"></div>
+                        <div class="trophy-icon">
+                            <i class="fas fa-medal"></i>
+                        </div>
+                        <div class="avatar w-20 h-20 mb-4" id="secondPlaceAvatar">--</div>
+                        <span class="font-bold text-gray-800 text-lg" id="secondPlaceName">--</span>
+                        <span class="text-sm text-gray-700 font-medium" id="secondPlaceCount">0 configurações</span>
+                    </div>
+                    <div class="podium-base">
+                        <span class="podium-number">2º Lugar</span>
+                    </div>
+                </div>
+
+                <!-- 1st Place -->
+                <div class="podium-item first-place" id="firstPlaceContainer">
+                    <div class="confetti-container" id="firstConfetti"></div>
+                    <div class="podium-platform gold-gradient relative flex flex-col items-center justify-end pb-8 glow">
+                        <div class="laurel"></div>
+                        <div class="trophy-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="avatar w-24 h-24 mb-4" id="firstPlaceAvatar">--</div>
+                        <span class="font-bold text-gray-800 text-xl" id="firstPlaceName">--</span>
+                        <span class="text-md text-gray-700 font-medium" id="firstPlaceCount">0 configurações</span>
+                    </div>
+                    <div class="podium-base">
+                        <span class="podium-number">1º Lugar</span>
+                    </div>
+                </div>
+
+                <!-- 3rd Place -->
+                <div class="podium-item third-place" id="thirdPlaceContainer">
+                    <div class="confetti-container" id="thirdConfetti"></div>
+                    <div class="podium-platform bronze-gradient relative flex flex-col items-center justify-end pb-4">
+                        <div class="laurel"></div>
+                        <div class="trophy-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <div class="avatar w-16 h-16 mb-3" id="thirdPlaceAvatar">--</div>
+                        <span class="font-bold text-gray-800 text-md" id="thirdPlaceName">--</span>
+                        <span class="text-xs text-gray-700 font-medium" id="thirdPlaceCount">0 configurações</span>
+                    </div>
+                    <div class="podium-base">
+                        <span class="podium-number">3º Lugar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full List -->
+            <div class="bg-white rounded-lg shadow p-4 mt-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Lista Completa de Técnicos</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posição</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Técnico</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Configurações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="techniciansList" class="bg-white divide-y divide-gray-200">
+                            <!-- List will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="bg-white rounded-xl shadow-md p-8 text-center mt-8">
+            <div class="text-indigo-500 mb-4">
+                <i class="fas fa-trophy text-5xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Pódio dos Técnicos</h2>
+            <p class="text-gray-600 mb-6">Carregue os dados da planilha para visualizar o ranking dos técnicos com mais configurações realizadas.</p>
+            <button id="loadDataBtn2" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg shadow cursor-pointer transition duration-300 inline-flex items-center">
+                <i class="fas fa-link mr-2"></i> 
+                <span id="loadBtnText2">Carregar Dados</span>
+                <span id="loadSpinner2" class="loading-spinner hidden ml-2"></span>
+            </button>
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2 class="modal-title">Acesso Restrito</h2>
+            <form id="loginForm">
+                <div class="input-field">
+                    <input type="text" id="username" required>
+                    <label for="username">Usuário</label>
+                </div>
+                <div class="input-field">
+                    <input type="password" id="password" required>
+                    <label for="password">Senha</label>
+                </div>
+                <button type="submit" class="modal-btn">
+                    Entrar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const elements = {
+                loadDataBtn: document.getElementById('loadDataBtn'),
+                loadBtnText: document.getElementById('loadBtnText'),
+                loadSpinner: document.getElementById('loadSpinner'),
+                loadDataBtn2: document.getElementById('loadDataBtn2'),
+                loadBtnText2: document.getElementById('loadBtnText2'),
+                loadSpinner2: document.getElementById('loadSpinner2'),
+                googleSheetsUrl: document.getElementById('googleSheetsUrl'),
+                loadFromUrlBtn: document.getElementById('loadFromUrlBtn'),
+                podiumContainer: document.getElementById('podiumContainer'),
+                emptyState: document.getElementById('emptyState'),
+                techniciansList: document.getElementById('techniciansList'),
+                firstPlaceAvatar: document.getElementById('firstPlaceAvatar'),
+                firstPlaceName: document.getElementById('firstPlaceName'),
+                firstPlaceCount: document.getElementById('firstPlaceCount'),
+                secondPlaceAvatar: document.getElementById('secondPlaceAvatar'),
+                secondPlaceName: document.getElementById('secondPlaceName'),
+                secondPlaceCount: document.getElementById('secondPlaceCount'),
+                thirdPlaceAvatar: document.getElementById('thirdPlaceAvatar'),
+                thirdPlaceName: document.getElementById('thirdPlaceName'),
+                thirdPlaceCount: document.getElementById('thirdPlaceCount'),
+                loginModal: document.getElementById('loginModal'),
+                closeModal: document.querySelector('.close-modal'),
+                loginForm: document.getElementById('loginForm'),
+                username: document.getElementById('username'),
+                password: document.getElementById('password'),
+                firstPlaceContainer: document.getElementById('firstPlaceContainer'),
+                secondPlaceContainer: document.getElementById('secondPlaceContainer'),
+                thirdPlaceContainer: document.getElementById('thirdPlaceContainer')
+            };
+
+            // Application State
+            const state = {
+                googleSheetsUrl: '',
+                techniciansData: []
+            };
+
+            // Initialize Event Listeners
+            function initEventListeners() {
+                // Load Data Buttons
+                elements.loadDataBtn.addEventListener('click', loadData);
+                elements.loadDataBtn2.addEventListener('click', loadData);
+                elements.loadFromUrlBtn.addEventListener('click', loadFromUrl);
+                
+                // Google Sheets URL Input
+                elements.googleSheetsUrl.addEventListener('input', function(e) {
+                    state.googleSheetsUrl = e.target.value;
+                });
+                elements.googleSheetsUrl.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') loadFromUrl();
+                });
+                
+                // Modal Interactions
+                elements.closeModal.addEventListener('click', hideLoginModal);
+                elements.loginForm.addEventListener('submit', handleLogin);
+                
+                // Close modal when clicking outside
+                window.addEventListener('click', function(event) {
+                    if (event.target === elements.loginModal) {
+                        hideLoginModal();
+                    }
+                });
+            }
+
+            // UI Functions
+            function showLoading(show) {
+                if (show) {
+                    elements.loadBtnText.textContent = 'Carregando...';
+                    elements.loadSpinner.classList.remove('hidden');
+                    elements.loadBtnText2.textContent = 'Carregando...';
+                    elements.loadSpinner2.classList.remove('hidden');
+                } else {
+                    elements.loadBtnText.textContent = 'Carregar Dados';
+                    elements.loadSpinner.classList.add('hidden');
+                    elements.loadBtnText2.textContent = 'Carregar Dados';
+                    elements.loadSpinner2.classList.add('hidden');
+                }
+            }
+
+            function showLoginModal() {
+                elements.loginModal.style.display = 'block';
+            }
+
+            function hideLoginModal() {
+                elements.loginModal.style.display = 'none';
+                elements.loginForm.reset();
+            }
+
+            function handleLogin(e) {
+                e.preventDefault();
+                const username = elements.username.value.trim();
+                const password = elements.password.value.trim();
+                
+                if (username === 'Natanael' && password === 'toledo2025') {
+                    hideLoginModal();
+                    // Redirect to dashboard or perform other actions
+                } else {
+                    alert('Usuário ou senha incorretos!');
+                }
+            }
+
+            // Confetti Functions
+            function fireConfetti(element) {
+                const rect = element.getBoundingClientRect();
+                const x = (rect.left + rect.width / 2) / window.innerWidth;
+                const y = (rect.top + rect.height / 2) / window.innerHeight;
+                
+                confetti({
+                    particleCount: 100,
+                    angle: 90,
+                    spread: 45,
+                    origin: { x, y },
+                    colors: ['#FFD700', '#C0C0C0', '#CD7F32', '#ffffff']
+                });
+            }
+
+            function fireConfettiForTop3() {
+                // Fire confetti for 1st place
+                setTimeout(() => {
+                    fireConfetti(elements.firstPlaceContainer);
+                }, 0);
+                
+                // Fire confetti for 2nd place
+                setTimeout(() => {
+                    fireConfetti(elements.secondPlaceContainer);
+                }, 300);
+                
+                // Fire confetti for 3rd place
+                setTimeout(() => {
+                    fireConfetti(elements.thirdPlaceContainer);
+                }, 600);
+            }
+
+            // Data Processing Functions
+            function loadData() {
+                if (!state.googleSheetsUrl) {
+                    alert('Por favor, insira a URL do Google Sheets primeiro');
+                    return;
+                }
+                loadFromUrl();
+            }
+
+            function loadFromUrl() {
+                const url = elements.googleSheetsUrl.value;
+                if (!url) {
+                    alert('Por favor, cole a URL do Google Sheets');
+                    return;
+                }
+
+                state.googleSheetsUrl = url;
+                showLoading(true);
+
+                try {
+                    // Extract spreadsheet ID
+                    let spreadsheetId = '';
+                    const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+                    spreadsheetId = match && match[1] ? match[1] : url;
+
+                    // Construct export URL
+                    const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=xlsx`;
+
+                    // Fetch and process the file
+                    fetch(exportUrl)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Erro ao carregar a planilha. Verifique a URL e se a planilha é pública.');
+                            return response.arrayBuffer();
+                        })
+                        .then(data => {
+                            const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+                            processWorkbook(workbook);
+                            showLoading(false);
+                        })
+                        .catch(error => {
+                            alert(error.message);
+                            console.error('Error loading Google Sheets:', error);
+                            showLoading(false);
+                        });
+                } catch (error) {
+                    alert('Erro ao processar a URL. Verifique se é uma URL válida do Google Sheets.');
+                    console.error('Error processing Google Sheets URL:', error);
+                    showLoading(false);
+                }
+            }
+
+            function processWorkbook(workbook) {
+                if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+                    alert('A planilha não contém abas.');
+                    return;
+                }
+
+                // Get first sheet
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                if (!worksheet) {
+                    alert('A planilha não contém dados.');
+                    return;
+                }
+
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+
+                if (!jsonData || jsonData.length < 2) {
+                    alert('A planilha não contém dados suficientes.');
+                    return;
+                }
+
+                // Find column indexes for "Tecnico" and "Configuração"
+                const headers = jsonData[0] ? jsonData[0].map(h => h ? String(h).toLowerCase().trim() : '') : [];
+                const tecnicoIndex = headers.findIndex(h => h.includes('tecnico'));
+                const configIndex = headers.findIndex(h => h.includes('configura'));
+
+                if (tecnicoIndex === -1 || configIndex === -1) {
+                    alert('A planilha deve conter colunas com os nomes "Tecnico" e "Configuração"');
+                    return;
+                }
+
+                // Process data rows
+                const dataRows = jsonData.slice(1);
+                const techniciansMap = new Map();
+
+                dataRows.forEach(row => {
+                    // Verifica se a linha existe e tem os índices necessários
+                    if (row && row.length > Math.max(tecnicoIndex, configIndex)) {
+                        const tecnico = row[tecnicoIndex] ? String(row[tecnicoIndex]).trim() : null;
+                        const config = row[configIndex] ? String(row[configIndex]).trim() : null;
+
+                        if (tecnico && config) {
+                            if (techniciansMap.has(tecnico)) {
+                                techniciansMap.set(tecnico, techniciansMap.get(tecnico) + 1);
+                            } else {
+                                techniciansMap.set(tecnico, 1);
+                            }
+                        }
+                    }
+                });
+
+                // Convert to array and sort by count
+                state.techniciansData = Array.from(techniciansMap.entries())
+                    .map(([name, count]) => ({ name, count }))
+                    .sort((a, b) => b.count - a.count);
+
+                // Update UI
+                updatePodium();
+            }
+
+            function updatePodium() {
+                if (!state.techniciansData || state.techniciansData.length === 0) {
+                    alert('Nenhum técnico com configurações encontrado.');
+                    return;
+                }
+
+                // Show podium and hide empty state
+                elements.podiumContainer.classList.remove('hidden');
+                elements.emptyState.classList.add('hidden');
+
+                // Update top 3 technicians
+                const top3 = state.techniciansData.slice(0, 3);
+
+                // 1st Place
+                if (top3[0]) {
+                    const first = top3[0];
+                    elements.firstPlaceName.textContent = first.name || '--';
+                    elements.firstPlaceCount.textContent = `${first.count || 0} configuração${first.count !== 1 ? 'ões' : ''}`;
+                    elements.firstPlaceAvatar.textContent = getInitials(first.name);
+                    elements.firstPlaceAvatar.style.backgroundColor = getRandomColor(first.name);
+                }
+
+                // 2nd Place
+                if (top3[1]) {
+                    const second = top3[1];
+                    elements.secondPlaceName.textContent = second.name || '--';
+                    elements.secondPlaceCount.textContent = `${second.count || 0} configuração${second.count !== 1 ? 'ões' : ''}`;
+                    elements.secondPlaceAvatar.textContent = getInitials(second.name);
+                    elements.secondPlaceAvatar.style.backgroundColor = getRandomColor(second.name);
+                }
+
+                // 3rd Place
+                if (top3[2]) {
+                    const third = top3[2];
+                    elements.thirdPlaceName.textContent = third.name || '--';
+                    elements.thirdPlaceCount.textContent = `${third.count || 0} configuração${third.count !== 1 ? 'ões' : ''}`;
+                    elements.thirdPlaceAvatar.textContent = getInitials(third.name);
+                    elements.thirdPlaceAvatar.style.backgroundColor = getRandomColor(third.name);
+                }
+
+                // Update full list
+                elements.techniciansList.innerHTML = '';
+                state.techniciansData.forEach((tech, index) => {
+                    if (!tech || !tech.name) return;
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gray-50';
+
+                    const tdPosition = document.createElement('td');
+                    tdPosition.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+                    
+                    // Add medal for top 3
+                    if (index === 0) {
+                        tdPosition.innerHTML = `<span class="inline-block w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center">1</span>`;
+                    } else if (index === 1) {
+                        tdPosition.innerHTML = `<span class="inline-block w-6 h-6 bg-gray-400 text-white rounded-full flex items-center justify-center">2</span>`;
+                    } else if (index === 2) {
+                        tdPosition.innerHTML = `<span class="inline-block w-6 h-6 bg-amber-700 text-white rounded-full flex items-center justify-center">3</span>`;
+                    } else {
+                        tdPosition.textContent = `${index + 1}º`;
+                    }
+                    
+                    tr.appendChild(tdPosition);
+
+                    const tdName = document.createElement('td');
+                    tdName.className = 'px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900';
+                    
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'flex items-center';
+                    
+                    const avatar = document.createElement('div');
+                    avatar.className = 'w-8 h-8 rounded-full flex items-center justify-center text-white font-bold mr-3';
+                    avatar.textContent = getInitials(tech.name);
+                    avatar.style.backgroundColor = getRandomColor(tech.name);
+                    
+                    nameDiv.appendChild(avatar);
+                    nameDiv.appendChild(document.createTextNode(tech.name));
+                    tdName.appendChild(nameDiv);
+                    tr.appendChild(tdName);
+
+                    const tdCount = document.createElement('td');
+                    tdCount.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+                    tdCount.textContent = `${tech.count || 0} configuração${tech.count !== 1 ? 'ões' : ''}`;
+                    tr.appendChild(tdCount);
+
+                    elements.techniciansList.appendChild(tr);
+                });
+
+                // Fire confetti for top 3
+                fireConfettiForTop3();
+            }
+
+            function getInitials(name) {
+                if (!name) return '--';
+                
+                const parts = name.split(' ');
+                if (parts.length >= 2) {
+                    return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+                } else if (name.length >= 2) {
+                    return name.substring(0, 2).toUpperCase();
+                }
+                return name.substring(0, 1).toUpperCase();
+            }
+
+            function getRandomColor(name) {
+                if (!name) return '#999';
+                
+                // Generate a consistent color based on the name
+                let hash = 0;
+                for (let i = 0; i < name.length; i++) {
+                    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                
+                const h = hash % 360;
+                return `hsl(${h}, 70%, 60%)`;
+            }
+
+            // Initialize the application
+            initEventListeners();
+        });
+    </script>
+</body>
+</html>
