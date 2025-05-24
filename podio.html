@@ -8,7 +8,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
+        body {
+            background-color: #2a2a2a;
+            color: #e0e0e0;
+        }
+        
         .podium-step {
             transition: all 0.3s ease;
         }
@@ -58,7 +64,7 @@
             backdrop-filter: blur(5px);
         }
         .modal-content {
-            background-color: #fff;
+            background-color: #333;
             margin: 10% auto;
             padding: 30px;
             border-radius: 12px;
@@ -91,10 +97,12 @@
         .input-field input {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
             border-radius: 8px;
             font-size: 16px;
             transition: all 0.3s;
+            background-color: #444;
+            color: #fff;
         }
         .input-field input:focus {
             border-color: #6366f1;
@@ -105,7 +113,7 @@
             position: absolute;
             top: -10px;
             left: 10px;
-            background: white;
+            background: #333;
             padding: 0 5px;
             font-size: 14px;
             color: #6366f1;
@@ -128,7 +136,7 @@
         .modal-title {
             text-align: center;
             margin-bottom: 25px;
-            color: #333;
+            color: #fff;
             font-size: 24px;
             font-weight: 700;
         }
@@ -146,7 +154,8 @@
             align-items: flex-end;
             gap: 20px;
             height: 500px;
-            margin-bottom: 60px;
+            margin-bottom: 20px;
+            margin-top: 20px;
         }
         
         .podium-item {
@@ -162,24 +171,25 @@
         }
         
         .second-place {
-            height: 320px;
+            height: 350px;
         }
         
         .third-place {
-            height: 280px;
+            height: 300px;
         }
         
         /* Larguras dos degraus do pódio */
-        .first-place .podium-platform {
+        .podium-platform {
             width: 220px;
-        }
-        
-        .second-place .podium-platform {
-            width: 180px;
-        }
-        
-        .third-place .podium-platform {
-            width: 160px;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 20px;
         }
         
         /* Bases do pódio */
@@ -192,20 +202,18 @@
             font-weight: bold;
             border-radius: 0 0 8px 8px;
             box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            height: 60px;
         }
         
         .first-place .podium-base {
-            height: 60px;
             background-color: #FFD700;
         }
         
         .second-place .podium-base {
-            height: 60px;
             background-color: #C0C0C0;
         }
         
         .third-place .podium-base {
-            height: 60px;
             background-color: #CD7F32;
         }
         
@@ -219,13 +227,6 @@
         
         .bronze-gradient {
             background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
-        }
-        
-        .podium-platform {
-            border-radius: 8px 8px 0 0;
-            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
         }
         
         .podium-platform::before {
@@ -272,129 +273,200 @@
             z-index: 10;
         }
 
-        /* Carrossel de outros pódios */
-        .other-podiums-container {
+        /* Progress bars */
+        .progress-container {
             width: 100%;
-            max-width: 800px;
-            margin: 40px auto;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .other-podiums-carousel {
-            display: flex;
-            transition: transform 0.5s ease;
-        }
-
-        .other-podium-item {
-            min-width: 100%;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .other-podium {
-            width: 300px;
-            height: 250px;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-            color: white;
-            padding: 20px;
-        }
-
-        .other-podium::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: rgba(255,255,255,0.5);
-        }
-
-        .other-podium-position {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            color: rgba(255,255,255,0.8);
-        }
-
-        .other-podium-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
+            background-color: #444;
+            border-radius: 8px;
             margin-bottom: 15px;
+            overflow: hidden;
         }
-
-        .other-podium-name {
-            font-size: 22px;
+        
+        .progress-bar {
+            height: 20px;
+            border-radius: 8px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 12px;
             font-weight: bold;
-            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .progress-completed {
+            background-color: #10b981;
+        }
+        
+        .progress-pending {
+            background-color: #ef4444;
+        }
+        
+        /* Configurações section */
+        .configurations-container {
+            background-color: #333;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-right: 20px;
+            flex: 1;
+        }
+        
+        .config-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #6366f1;
             text-align: center;
         }
-
-        .other-podium-count {
-            font-size: 16px;
-            opacity: 0.9;
+        
+        .config-section {
+            margin-bottom: 30px;
         }
-
-        .carousel-nav {
+        
+        .config-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #fff;
+            border-bottom: 2px solid #6366f1;
+            padding-bottom: 5px;
+        }
+        
+        .config-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .config-item {
+            background-color: #444;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
             display: flex;
-            justify-content: center;
-            margin-top: 20px;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
         }
-
-        .carousel-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: #ccc;
-            margin: 0 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
+        
+        .config-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
         }
-
-        .carousel-dot.active {
-            background-color: #4f46e5;
+        
+        .config-name {
+            font-weight: 500;
         }
-
-        /* Cores alternativas para os outros pódios */
-        .podium-purple {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        
+        .config-status {
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
         }
-
-        .podium-blue {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        
+        .completed {
+            background-color: #10b981;
+            color: white;
+            animation: neon-green 1.5s infinite alternate;
         }
-
-        .podium-teal {
-            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+        
+        .pending {
+            background-color: #ef4444;
+            color: white;
+            animation: neon-red 1.5s infinite alternate;
         }
-
-        .podium-pink {
-            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+        
+        @keyframes neon-green {
+            from {
+                box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+            }
+            to {
+                box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+            }
         }
-
-        .podium-orange {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        
+        @keyframes neon-red {
+            from {
+                box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+            }
+            to {
+                box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+            }
         }
-
+        
+        /* Scrollbar styling */
+        .config-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .config-list::-webkit-scrollbar-track {
+            background: #444;
+            border-radius: 10px;
+        }
+        
+        .config-list::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 10px;
+        }
+        
+        .config-list::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+        
+        /* Layout principal */
+        .main-content-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .left-panel {
+            flex: 1;
+            position: relative;
+        }
+        
+        .right-panel {
+            width: 60%; /* Increased width for the right panel */
+        }
+        
+        /* Stats cards */
+        .stats-card {
+            background-color: #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stats-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+        }
+        
+        .stats-title i {
+            margin-right: 10px;
+            color: #6366f1;
+        }
+        
+        .stats-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+        
+        .stats-description {
+            font-size: 14px;
+            color: #ccc;
+        }
+        
         /* Timer de atualização */
         .update-timer {
             position: fixed;
@@ -414,9 +486,273 @@
         .update-timer i {
             margin-right: 8px;
         }
+        
+        /* Badge for online status */
+        .online-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #10b981;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+        
+        /* Carrossel de pódios */
+        .carousel-container {
+            width: 100%;
+            overflow: hidden;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .carousel-track {
+            display: flex;
+            transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+            align-items: center;
+            height: 350px;
+        }
+        
+        .carousel-slide {
+            min-width: 100%;
+            padding: 0 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #555;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .carousel-dot.active {
+            background-color: #6366f1;
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .carousel-btn:hover {
+            background-color: rgba(0,0,0,0.7);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .carousel-btn.prev {
+            left: 10px;
+        }
+        
+        .carousel-btn.next {
+            right: 10px;
+        }
+        
+        .carousel-wrapper {
+            position: relative;
+            width: 100%; /* Full width for the carousel */
+        }
+        
+        /* Custom podium colors */
+        .podium-purple {
+            background: linear-gradient(135deg, #8A2BE2 0%, #9932CC 100%);
+        }
+        
+        .podium-blue {
+            background: linear-gradient(135deg, #1E90FF 0%, #4169E1 100%);
+        }
+        
+        .podium-green {
+            background: linear-gradient(135deg, #2E8B57 0%, #3CB371 100%);
+        }
+        
+        .podium-red {
+            background: linear-gradient(135deg, #FF4500 0%, #DC143C 100%);
+        }
+        
+        .podium-orange {
+            background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%);
+        }
+        
+        .podium-pink {
+            background: linear-gradient(135deg, #FF69B4 0%, #DB7093 100%);
+        }
+        
+        .podium-teal {
+            background: linear-gradient(135deg, #008080 0%, #20B2AA 100%);
+        }
+        
+        .podium-indigo {
+            background: linear-gradient(135deg, #4B0082 0%, #6A5ACD 100%);
+        }
+
+        /* Podium cards - Made larger */
+        .podium-card {
+            width: 280px; /* Increased width */
+            height: 350px; /* Increased height */
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 20px;
+            position: relative;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            margin: 0 auto;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            transform: scale(0.9);
+            opacity: 0.7;
+        }
+
+        .podium-card.active {
+            transform: scale(1);
+            opacity: 1;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .podium-card-avatar {
+            width: 100px; /* Increased size */
+            height: 100px; /* Increased size */
+            border-radius: 50%;
+            background-color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 15px;
+            font-size: 28px; /* Larger text */
+        }
+
+        .podium-card-name {
+            font-weight: bold;
+            font-size: 22px; /* Larger text */
+            color: white;
+            margin-bottom: 5px;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .podium-card-count {
+            font-size: 16px; /* Larger text */
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 15px;
+        }
+
+        .podium-card-position {
+            width: 100%;
+            height: 60px; /* Increased height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 22px; /* Larger text */
+            border-radius: 0 0 8px 8px;
+        }
+
+        .podium-cards-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        /* Auto-rotate indicator */
+        .auto-rotate-indicator {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            align-items: center;
+        }
+
+        .auto-rotate-indicator i {
+            margin-right: 5px;
+        }
+
+        /* Three.js WiFi Symbol Container */
+        #wifi-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            z-index: 10;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .main-content-container {
+                flex-direction: column;
+            }
+            
+            .right-panel {
+                width: 100%;
+            }
+            
+            .podium-container {
+                height: auto;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .podium-item {
+                margin-bottom: 20px;
+            }
+            
+            .first-place, .second-place, .third-place {
+                height: 300px;
+            }
+
+            .carousel-track {
+                height: 300px;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="font-sans min-h-screen">
     <!-- Header -->
     <header class="bg-indigo-800 text-white p-4 shadow-md">
         <div class="container mx-auto flex justify-between items-center">
@@ -432,12 +768,12 @@
     <!-- Main Content -->
     <main class="container mx-auto p-4">
         <!-- Google Sheets URL Input -->
-        <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="bg-gray-700 rounded-lg shadow p-4 mb-6">
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">URL do Google Sheets</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">URL do Google Sheets</label>
                     <input type="text" id="googleSheetsUrl" placeholder="Cole a URL pública do Google Sheets" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        class="w-full px-3 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-gray-600 text-white">
                 </div>
                 <div class="flex items-end">
                     <button id="loadFromUrlBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-md h-10 flex items-center">
@@ -445,101 +781,157 @@
                     </button>
                 </div>
             </div>
-            <p class="text-sm text-gray-500 mt-2">A planilha deve conter colunas com os nomes "Tecnico" e "Configuração"</p>
+            <p class="text-sm text-gray-400 mt-2">A planilha deve conter colunas com os nomes "Tecnico" e "Configurado"</p>
         </div>
 
-        <!-- Podium -->
+        <!-- Podium and Configurations -->
         <div id="podiumContainer" class="hidden">
             <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800 mb-2">Top 3 Técnicos</h2>
-                <p class="text-gray-600">Técnicos com mais configurações realizadas</p>
+                <h2 class="text-3xl font-bold text-white mb-2">Destaques e Configurações</h2>
+                <p class="text-gray-400">Técnicos com mais configurações realizadas e status das configurações</p>
             </div>
 
-            <!-- Pódio lado a lado -->
-            <div class="podium-container">
-                <!-- 2nd Place -->
-                <div class="podium-item second-place" id="secondPlaceContainer">
-                    <div class="confetti-container" id="secondConfetti"></div>
-                    <div class="podium-platform silver-gradient relative flex flex-col items-center justify-end pb-6">
-                        <div class="laurel"></div>
-                        <div class="trophy-icon">
-                            <i class="fas fa-medal"></i>
+            <div class="main-content-container">
+                <!-- Left Panel - Configurations -->
+                <div class="left-panel">
+                    <!-- Three.js WiFi Symbol -->
+                    <!-- <div id="wifi-container"></div> -->
+                    
+                    <!-- Stats Cards -->
+                    <div class="stats-grid grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="stats-card">
+                            <div class="stats-title">
+                                <i class="fas fa-check-circle"></i>
+                                Configurações Concluídas
+                            </div>
+                            <div class="stats-value" id="completedCount">0</div>
+                            <div class="stats-description">Total de configurações finalizadas</div>
                         </div>
-                        <div class="avatar w-24 h-24 mb-4 text-3xl" id="secondPlaceAvatar">--</div>
-                        <span class="font-bold text-gray-800 text-xl" id="secondPlaceName">--</span>
-                        <span class="text-md text-gray-700 font-medium" id="secondPlaceCount">0 configurações</span>
-                    </div>
-                    <div class="podium-base">
-                        <span class="podium-number">2º Lugar</span>
-                    </div>
-                </div>
-
-                <!-- 1st Place -->
-                <div class="podium-item first-place" id="firstPlaceContainer">
-                    <div class="confetti-container" id="firstConfetti"></div>
-                    <div class="podium-platform gold-gradient relative flex flex-col items-center justify-end pb-8 glow">
-                        <div class="laurel"></div>
-                        <div class="trophy-icon">
-                            <i class="fas fa-crown"></i>
+                        
+                        <div class="stats-card">
+                            <div class="stats-title">
+                                <i class="fas fa-clock"></i>
+                                Configurações Pendentes
+                            </div>
+                            <div class="stats-value" id="pendingCount">0</div>
+                            <div class="stats-description">Configurações que ainda precisam ser feitas</div>
                         </div>
-                        <div class="avatar w-28 h-28 mb-4 text-4xl" id="firstPlaceAvatar">--</div>
-                        <span class="font-bold text-gray-800 text-2xl" id="firstPlaceName">--</span>
-                        <span class="text-lg text-gray-700 font-medium" id="firstPlaceCount">0 configurações</span>
-                    </div>
-                    <div class="podium-base">
-                        <span class="podium-number">1º Lugar</span>
-                    </div>
-                </div>
-
-                <!-- 3rd Place -->
-                <div class="podium-item third-place" id="thirdPlaceContainer">
-                    <div class="confetti-container" id="thirdConfetti"></div>
-                    <div class="podium-platform bronze-gradient relative flex flex-col items-center justify-end pb-4">
-                        <div class="laurel"></div>
-                        <div class="trophy-icon">
-                            <i class="fas fa-award"></i>
+                        
+                        <div class="stats-card">
+                            <div class="stats-title">
+                                <i class="fas fa-chart-line"></i>
+                                Progresso Total
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar progress-completed" id="totalProgressBar" style="width: 0%">0%</div>
+                            </div>
+                            <div class="stats-description mt-2" id="progressDescription">0 de 21742 configurações concluídas</div>
                         </div>
-                        <div class="avatar w-20 h-20 mb-3 text-2xl" id="thirdPlaceAvatar">--</div>
-                        <span class="font-bold text-gray-800 text-lg" id="thirdPlaceName">--</span>
-                        <span class="text-sm text-gray-700 font-medium" id="thirdPlaceCount">0 configurações</span>
-                    </div>
-                    <div class="podium-base">
-                        <span class="podium-number">3º Lugar</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Carrossel de outros pódios -->
-            <div id="otherPodiumsSection" class="hidden">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Outros Destaques</h2>
-                    <p class="text-gray-600">Técnicos que também se destacaram</p>
-                </div>
-                
-                <div class="other-podiums-container">
-                    <div class="other-podiums-carousel" id="otherPodiumsCarousel">
-                        <!-- Itens serão adicionados dinamicamente -->
+                        
+                        <div class="stats-card">
+                            <div class="stats-title">
+                                <i class="fas fa-users"></i>
+                                Técnicos Ativos
+                            </div>
+                            <div class="stats-value" id="activeTechnicians">0</div>
+                            <div class="stats-description">Técnicos com configurações atribuídas</div>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="carousel-nav" id="carouselNav">
-                    <!-- Pontos de navegação serão adicionados dinamicamente -->
+                <!-- Right Panel - Podium -->
+                <div class="right-panel">
+                    <!-- Pódio top 3 -->
+                    <div class="podium-container">
+                        <!-- 2nd Place -->
+                        <div class="podium-item second-place" id="secondPlaceContainer">
+                            <div class="confetti-container" id="secondConfetti"></div>
+                            <div class="podium-platform silver-gradient relative">
+                                <div class="laurel"></div>
+                                <div class="trophy-icon">
+                                    <i class="fas fa-medal"></i>
+                                </div>
+                                <div class="avatar w-24 h-24 mb-4 text-3xl" id="secondPlaceAvatar">--</div>
+                                <span class="font-bold text-gray-800 text-xl" id="secondPlaceName">--</span>
+                                <span class="text-md text-gray-700 font-medium" id="secondPlaceCount">0 configurações</span>
+                            </div>
+                            <div class="podium-base">
+                                <span class="podium-number">2º Lugar</span>
+                            </div>
+                        </div>
+
+                        <!-- 1st Place -->
+                        <div class="podium-item first-place" id="firstPlaceContainer">
+                            <div class="confetti-container" id="firstConfetti"></div>
+                            <div class="podium-platform gold-gradient relative glow">
+                                <div class="laurel"></div>
+                                <div class="trophy-icon">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                                <div class="avatar w-28 h-28 mb-4 text-4xl" id="firstPlaceAvatar">--</div>
+                                <span class="font-bold text-gray-800 text-2xl" id="firstPlaceName">--</span>
+                                <span class="text-lg text-gray-700 font-medium" id="firstPlaceCount">0 configurações</span>
+                            </div>
+                            <div class="podium-base">
+                                <span class="podium-number">1º Lugar</span>
+                            </div>
+                        </div>
+
+                        <!-- 3rd Place -->
+                        <div class="podium-item third-place" id="thirdPlaceContainer">
+                            <div class="confetti-container" id="thirdConfetti"></div>
+                            <div class="podium-platform bronze-gradient relative">
+                                <div class="laurel"></div>
+                                <div class="trophy-icon">
+                                    <i class="fas fa-award"></i>
+                                </div>
+                                <div class="avatar w-20 h-20 mb-3 text-2xl" id="thirdPlaceAvatar">--</div>
+                                <span class="font-bold text-gray-800 text-lg" id="thirdPlaceName">--</span>
+                                <span class="text-sm text-gray-700 font-medium" id="thirdPlaceCount">0 configurações</span>
+                            </div>
+                            <div class="podium-base">
+                                <span class="podium-number">3º Lugar</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carrossel para outros técnicos -->
+                    <div class="carousel-wrapper">
+                        <h3 class="text-xl font-semibold text-white mb-4 text-center">Outros Técnicos</h3>
+                        <div class="carousel-container">
+                            <div class="carousel-track" id="techniciansCarousel">
+                                <!-- Cards will be added here -->
+                            </div>
+                            <button class="carousel-btn prev">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="carousel-btn next">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="auto-rotate-indicator">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Passagem automática ativada</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Full List -->
-            <div class="bg-white rounded-lg shadow p-4 mt-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">Lista Completa de Técnicos</h3>
+            <div class="bg-gray-700 rounded-lg shadow p-4 mt-8">
+                <h3 class="text-xl font-semibold text-white mb-4">Lista Completa de Técnicos</h3>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                    <table class="min-w-full divide-y divide-gray-600">
+                        <thead class="bg-gray-600">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posição</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Técnico</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Configurações</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Posição</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Técnico</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Configurações</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Progresso</th>
                             </tr>
                         </thead>
-                        <tbody id="techniciansList" class="bg-white divide-y divide-gray-200">
+                        <tbody id="techniciansList" class="bg-gray-700 divide-y divide-gray-600">
                             <!-- List will be populated here -->
                         </tbody>
                     </table>
@@ -548,12 +940,12 @@
         </div>
 
         <!-- Empty State -->
-        <div id="emptyState" class="bg-white rounded-xl shadow-md p-8 text-center mt-8">
+        <div id="emptyState" class="bg-gray-700 rounded-xl shadow-md p-8 text-center mt-8">
             <div class="text-indigo-500 mb-4">
                 <i class="fas fa-trophy text-5xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Pódio dos Técnicos</h2>
-            <p class="text-gray-600 mb-6">Carregue os dados da planilha para visualizar o ranking dos técnicos com mais configurações realizadas.</p>
+            <h2 class="text-2xl font-bold text-white mb-2">Pódio dos Técnicos</h2>
+            <p class="text-gray-400 mb-6">Carregue os dados da planilha para visualizar o ranking dos técnicos com mais configurações realizadas.</p>
             <button id="loadDataBtn2" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-lg shadow cursor-pointer transition duration-300 inline-flex items-center">
                 <i class="fas fa-link mr-2"></i> 
                 <span id="loadBtnText2">Carregar Dados</span>
@@ -624,23 +1016,119 @@
                 firstPlaceContainer: document.getElementById('firstPlaceContainer'),
                 secondPlaceContainer: document.getElementById('secondPlaceContainer'),
                 thirdPlaceContainer: document.getElementById('thirdPlaceContainer'),
-                otherPodiumsSection: document.getElementById('otherPodiumsSection'),
-                otherPodiumsCarousel: document.getElementById('otherPodiumsCarousel'),
-                carouselNav: document.getElementById('carouselNav'),
                 updateTimer: document.getElementById('updateTimer'),
-                timerText: document.getElementById('timerText')
+                timerText: document.getElementById('timerText'),
+                completedCount: document.getElementById('completedCount'),
+                pendingCount: document.getElementById('pendingCount'),
+                totalProgressBar: document.getElementById('totalProgressBar'),
+                progressDescription: document.getElementById('progressDescription'),
+                activeTechnicians: document.getElementById('activeTechnicians'),
+                techniciansCarousel: document.getElementById('techniciansCarousel'),
+                prevBtn: document.querySelector('.carousel-btn.prev'),
+                nextBtn: document.querySelector('.carousel-btn.next'),
+                wifiContainer: document.getElementById('wifi-container')
             };
 
             // Application State
             const state = {
                 googleSheetsUrl: '',
                 techniciansData: [],
-                currentCarouselIndex: 0,
-                carouselInterval: null,
+                configurationsData: [],
                 updateInterval: null,
                 updateTimerInterval: null,
-                lastUpdateTime: null
+                lastUpdateTime: null,
+                currentSlide: 0,
+                carouselSlides: [],
+                totalConfigurations: 21742, // Total fixo de configurações
+                autoRotateInterval: null,
+                autoRotateTime: 5000 // 5 segundos
             };
+
+            // Initialize Three.js WiFi Symbol
+            function initWiFiSymbol() {
+                const container = elements.wifiContainer;
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                // Create scene
+                const scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x2a2a2a);
+                
+                // Create camera
+                const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+                camera.position.z = 5;
+                
+                // Create renderer
+                const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(width, height);
+                container.appendChild(renderer.domElement);
+                
+                // Create WiFi symbol
+                const createArc = (radius, yPos, color) => {
+                    const arcShape = new THREE.Shape();
+                    arcShape.absarc(0, yPos, radius, 0, Math.PI * 2, false);
+                    
+                    const geometry = new THREE.ShapeGeometry(arcShape);
+                    const material = new THREE.MeshBasicMaterial({ 
+                        color: color,
+                        side: THREE.DoubleSide,
+                        wireframe: true,
+                        wireframeLinewidth: 3
+                    });
+                    
+                    const arc = new THREE.Mesh(geometry, material);
+                    arc.rotation.x = Math.PI / 2;
+                    return arc;
+                };
+                
+                // Create concentric arcs for WiFi symbol
+                const arcs = [
+                    { radius: 0.8, yPos: 0, color: 0x10b981 },
+                    { radius: 0.6, yPos: 0, color: 0x10b981 },
+                    { radius: 0.4, yPos: 0, color: 0x10b981 },
+                    { radius: 0.2, yPos: 0, color: 0x10b981 }
+                ];
+                
+                arcs.forEach(arc => {
+                    scene.add(createArc(arc.radius, arc.yPos, arc.color));
+                });
+                
+                // Add dot in the center
+                const dotGeometry = new THREE.SphereGeometry(0.05, 16, 16);
+                const dotMaterial = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+                const dot = new THREE.Mesh(dotGeometry, dotMaterial);
+                scene.add(dot);
+                
+                // Add glow effect
+                const glowGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+                const glowMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x10b981,
+                    transparent: true,
+                    opacity: 0.5
+                });
+                const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                scene.add(glow);
+                
+                // Animation
+                let time = 0;
+                const animate = () => {
+                    requestAnimationFrame(animate);
+                    
+                    time += 0.01;
+                    glow.scale.set(1 + Math.sin(time) * 0.2, 1 + Math.sin(time) * 0.2, 1);
+                    
+                    renderer.render(scene, camera);
+                };
+                
+                animate();
+                
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    camera.aspect = container.clientWidth / container.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                });
+            }
 
             // Initialize Event Listeners
             function initEventListeners() {
@@ -668,13 +1156,136 @@
                     }
                 });
 
-                // Carrossel navigation dots
-                elements.carouselNav.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('carousel-dot')) {
-                        const index = Array.from(e.target.parentNode.children).indexOf(e.target);
-                        goToCarouselSlide(index);
+                // Carousel navigation
+                elements.prevBtn.addEventListener('click', () => moveCarousel(-1));
+                elements.nextBtn.addEventListener('click', () => moveCarousel(1));
+            }
+
+            // Carousel Functions
+            function setupCarousel() {
+                // Clear existing slides
+                elements.techniciansCarousel.innerHTML = '';
+                state.carouselSlides = [];
+                
+                // Get technicians from position 4 onwards
+                const otherTechnicians = state.techniciansData.slice(3);
+                
+                if (otherTechnicians.length === 0) return;
+                
+                // Create slides for each technician
+                otherTechnicians.forEach((tech, index) => {
+                    const slide = document.createElement('div');
+                    slide.className = 'carousel-slide';
+                    
+                    // Create card for this technician
+                    const card = createTechnicianCard(tech, index + 4);
+                    slide.appendChild(card);
+                    
+                    elements.techniciansCarousel.appendChild(slide);
+                    state.carouselSlides.push(slide);
+                });
+                
+                // Start with first slide
+                updateCarousel();
+                
+                // Start auto-rotation
+                startAutoRotate();
+            }
+
+            function createTechnicianCard(tech, position) {
+                // Array of podium colors
+                const podiumColors = [
+                    'podium-purple', 'podium-blue', 'podium-green', 
+                    'podium-red', 'podium-orange', 'podium-pink',
+                    'podium-teal', 'podium-indigo'
+                ];
+                
+                const card = document.createElement('div');
+                card.className = 'podium-card';
+                
+                // Assign a color from our palette
+                const colorClass = podiumColors[position % podiumColors.length];
+                card.classList.add(colorClass);
+                
+                // Avatar
+                const avatar = document.createElement('div');
+                avatar.className = 'podium-card-avatar';
+                avatar.textContent = getInitials(tech.name);
+                avatar.style.backgroundColor = getRandomColor(tech.name);
+                
+                // Name
+                const name = document.createElement('div');
+                name.className = 'podium-card-name';
+                name.textContent = tech.name;
+                
+                // Count
+                const count = document.createElement('div');
+                count.className = 'podium-card-count';
+                count.textContent = `${tech.count} configuração${tech.count !== 1 ? 'ões' : ''}`;
+                
+                // Position
+                const positionEl = document.createElement('div');
+                positionEl.className = 'podium-card-position';
+                positionEl.textContent = `${position}º`;
+                
+                // Add elements to card
+                card.appendChild(avatar);
+                card.appendChild(name);
+                card.appendChild(count);
+                card.appendChild(positionEl);
+                
+                return card;
+            }
+
+            function moveCarousel(direction) {
+                // Stop auto-rotation temporarily when user interacts
+                stopAutoRotate();
+                
+                const numSlides = state.carouselSlides.length;
+                if (numSlides === 0) return;
+                
+                state.currentSlide = (state.currentSlide + direction + numSlides) % numSlides;
+                updateCarousel();
+                
+                // Restart auto-rotation after a delay
+                setTimeout(startAutoRotate, state.autoRotateTime * 2);
+            }
+
+            function updateCarousel() {
+                const track = elements.techniciansCarousel;
+                const slideWidth = track.clientWidth;
+                
+                // Move track to show current slide
+                track.style.transform = `translateX(-${state.currentSlide * slideWidth}px)`;
+                
+                // Update active state for cards
+                state.carouselSlides.forEach((slide, index) => {
+                    const card = slide.querySelector('.podium-card');
+                    if (card) {
+                        if (index === state.currentSlide) {
+                            card.classList.add('active');
+                        } else {
+                            card.classList.remove('active');
+                        }
                     }
                 });
+            }
+
+            function startAutoRotate() {
+                // Clear existing interval
+                stopAutoRotate();
+                
+                // Start new interval
+                state.autoRotateInterval = setInterval(() => {
+                    moveCarousel(1);
+                }, state.autoRotateTime);
+            }
+
+            function stopAutoRotate() {
+                if (state.autoRotateInterval) {
+                    clearInterval(state.autoRotateInterval);
+                    state.autoRotateInterval = null;
+                }
             }
 
             // UI Functions
@@ -746,75 +1357,30 @@
                 }, 600);
             }
 
-            // Carrossel Functions
-            function createOtherPodiumsCarousel(technicians) {
-                if (technicians.length <= 3) {
-                    elements.otherPodiumsSection.classList.add('hidden');
-                    return;
-                }
-
-                elements.otherPodiumsSection.classList.remove('hidden');
-                elements.otherPodiumsCarousel.innerHTML = '';
-                elements.carouselNav.innerHTML = '';
-
-                // Get technicians from 4th position onwards
-                const otherTechnicians = technicians.slice(3);
-
-                // Create carousel items
-                otherTechnicians.forEach((tech, index) => {
-                    // Create podium item
-                    const podiumItem = document.createElement('div');
-                    podiumItem.className = 'other-podium-item';
-                    
-                    // Determine podium color class
-                    const colorClasses = ['podium-purple', 'podium-blue', 'podium-teal', 'podium-pink', 'podium-orange'];
-                    const colorClass = colorClasses[index % colorClasses.length];
-                    
-                    podiumItem.innerHTML = `
-                        <div class="other-podium ${colorClass}">
-                            <div class="other-podium-position">${index + 4}º</div>
-                            <div class="other-podium-avatar" style="background-color: ${getRandomColor(tech.name)}">${getInitials(tech.name)}</div>
-                            <div class="other-podium-name">${tech.name}</div>
-                            <div class="other-podium-count">${tech.count} configuração${tech.count !== 1 ? 'ões' : ''}</div>
-                        </div>
-                    `;
-                    
-                    elements.otherPodiumsCarousel.appendChild(podiumItem);
-
-                    // Create navigation dot
-                    const dot = document.createElement('div');
-                    dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
-                    elements.carouselNav.appendChild(dot);
-                });
-
-                // Start carousel auto-rotation
-                startCarouselRotation();
-            }
-
-            function startCarouselRotation() {
-                // Clear any existing interval
-                if (state.carouselInterval) {
-                    clearInterval(state.carouselInterval);
-                }
-
-                // Start new interval (change every 5 seconds)
-                state.carouselInterval = setInterval(() => {
-                    const nextIndex = (state.currentCarouselIndex + 1) % (state.techniciansData.length - 3);
-                    goToCarouselSlide(nextIndex);
-                }, 5000);
-            }
-
-            function goToCarouselSlide(index) {
-                if (index < 0 || index >= (state.techniciansData.length - 3)) return;
+            // Configurations Functions
+            function updateConfigurationsList(configurations) {
+                // Calculate completed configurations
+                const completed = configurations.filter(config => config.configurado && config.configurado.trim() !== '').length;
                 
-                state.currentCarouselIndex = index;
-                elements.otherPodiumsCarousel.style.transform = `translateX(-${index * 100}%)`;
+                // Update stats cards
+                elements.completedCount.textContent = completed;
+                elements.pendingCount.textContent = configurations.length - completed;
                 
-                // Update active dot
-                const dots = elements.carouselNav.querySelectorAll('.carousel-dot');
-                dots.forEach((dot, i) => {
-                    dot.classList.toggle('active', i === index);
+                // Calculate progress based on total configurations (21742)
+                const progress = Math.round((completed / state.totalConfigurations) * 100);
+                
+                elements.totalProgressBar.style.width = `${progress}%`;
+                elements.totalProgressBar.textContent = `${progress}%`;
+                elements.progressDescription.textContent = `${completed} de ${state.totalConfigurations} configurações concluídas`;
+                
+                // Calculate active technicians (unique names)
+                const activeTechs = new Set();
+                configurations.forEach(config => {
+                    if (config.tecnico && config.tecnico.trim() !== '') {
+                        activeTechs.add(config.tecnico.trim());
+                    }
                 });
+                elements.activeTechnicians.textContent = activeTechs.size;
             }
 
             // Auto-update Functions
@@ -933,32 +1499,42 @@
                     return;
                 }
 
-                // Find column indexes for "Tecnico" and "Configuração"
+                // Find column indexes for "Tecnico" and "Configurado"
                 const headers = jsonData[0] ? jsonData[0].map(h => h ? String(h).toLowerCase().trim() : '') : [];
                 const tecnicoIndex = headers.findIndex(h => h.includes('tecnico'));
-                const configIndex = headers.findIndex(h => h.includes('configura'));
+                const configuradoIndex = headers.findIndex(h => h.includes('configurado'));
 
-                if (tecnicoIndex === -1 || configIndex === -1) {
-                    alert('A planilha deve conter colunas com os nomes "Tecnico" e "Configuração"');
+                if (tecnicoIndex === -1 || configuradoIndex === -1) {
+                    alert('A planilha deve conter colunas com os nomes "Tecnico" e "Configurado"');
                     return;
                 }
 
-                // Process data rows
+                // Process data rows for technicians and configurations
                 const dataRows = jsonData.slice(1);
                 const techniciansMap = new Map();
+                const configurationsList = [];
 
                 dataRows.forEach(row => {
                     // Verifica se a linha existe e tem os índices necessários
-                    if (row && row.length > Math.max(tecnicoIndex, configIndex)) {
+                    if (row && row.length > Math.max(tecnicoIndex, configuradoIndex)) {
                         const tecnico = row[tecnicoIndex] ? String(row[tecnicoIndex]).trim() : null;
-                        const config = row[configIndex] ? String(row[configIndex]).trim() : null;
+                        const configurado = row[configuradoIndex] ? String(row[configuradoIndex]).trim() : null;
 
-                        if (tecnico && config) {
+                        // Count configurations per technician (only count if configurado is not empty)
+                        if (tecnico && configurado && configurado !== '') {
                             if (techniciansMap.has(tecnico)) {
                                 techniciansMap.set(tecnico, techniciansMap.get(tecnico) + 1);
                             } else {
                                 techniciansMap.set(tecnico, 1);
                             }
+                        }
+                        
+                        // Add to configurations list
+                        if (tecnico) {
+                            configurationsList.push({
+                                tecnico: tecnico,
+                                configurado: configurado
+                            });
                         }
                     }
                 });
@@ -967,6 +1543,9 @@
                 state.techniciansData = Array.from(techniciansMap.entries())
                     .map(([name, count]) => ({ name, count }))
                     .sort((a, b) => b.count - a.count);
+                    
+                // Store configurations data
+                state.configurationsData = configurationsList;
 
                 // Update UI
                 updatePodium();
@@ -989,7 +1568,7 @@
                 if (top3[0]) {
                     const first = top3[0];
                     elements.firstPlaceName.textContent = first.name || '--';
-                    elements.firstPlaceCount.textContent = `${first.count || 0} configuração${first.count !== 1 ? 'ões' : ''}`;
+                    elements.firstPlaceCount.textContent = `${first.count || 0} configuraç${first.count !== 1 ? 'ões' : ''}`;
                     elements.firstPlaceAvatar.textContent = getInitials(first.name);
                     elements.firstPlaceAvatar.style.backgroundColor = getRandomColor(first.name);
                 }
@@ -998,7 +1577,7 @@
                 if (top3[1]) {
                     const second = top3[1];
                     elements.secondPlaceName.textContent = second.name || '--';
-                    elements.secondPlaceCount.textContent = `${second.count || 0} configuração${second.count !== 1 ? 'ões' : ''}`;
+                    elements.secondPlaceCount.textContent = `${second.count || 0} configuraç${second.count !== 1 ? 'ões' : ''}`;
                     elements.secondPlaceAvatar.textContent = getInitials(second.name);
                     elements.secondPlaceAvatar.style.backgroundColor = getRandomColor(second.name);
                 }
@@ -1007,24 +1586,35 @@
                 if (top3[2]) {
                     const third = top3[2];
                     elements.thirdPlaceName.textContent = third.name || '--';
-                    elements.thirdPlaceCount.textContent = `${third.count || 0} configuração${third.count !== 1 ? 'ões' : ''}`;
+                    elements.thirdPlaceCount.textContent = `${third.count || 0} configuraç${third.count !== 1 ? 'ões' : ''}`;
                     elements.thirdPlaceAvatar.textContent = getInitials(third.name);
                     elements.thirdPlaceAvatar.style.backgroundColor = getRandomColor(third.name);
                 }
 
-                // Create carousel for other podiums
-                createOtherPodiumsCarousel(state.techniciansData);
+                // Update configurations list
+                if (state.configurationsData.length > 0) {
+                    updateConfigurationsList(state.configurationsData);
+                }
+
+                // Setup carousel for other technicians
+                setupCarousel();
 
                 // Update full list
                 elements.techniciansList.innerHTML = '';
                 state.techniciansData.forEach((tech, index) => {
                     if (!tech || !tech.name) return;
                     
+                    // Calculate configurations for this technician
+                    const techConfigs = state.configurationsData.filter(c => c.tecnico === tech.name);
+                    const completed = techConfigs.filter(c => c.configurado && c.configurado.trim() !== '').length;
+                    const total = techConfigs.length;
+                    const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+                    
                     const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-gray-50';
+                    tr.className = 'hover:bg-gray-600';
 
                     const tdPosition = document.createElement('td');
-                    tdPosition.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
+                    tdPosition.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-300';
                     
                     // Add medal for top 3
                     if (index === 0) {
@@ -1040,7 +1630,7 @@
                     tr.appendChild(tdPosition);
 
                     const tdName = document.createElement('td');
-                    tdName.className = 'px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900';
+                    tdName.className = 'px-6 py-4 whitespace-nowrap text-sm font-medium text-white';
                     
                     const nameDiv = document.createElement('div');
                     nameDiv.className = 'flex items-center';
@@ -1054,11 +1644,38 @@
                     nameDiv.appendChild(document.createTextNode(tech.name));
                     tdName.appendChild(nameDiv);
                     tr.appendChild(tdName);
+                    
+                    // Status column (online/offline simulation)
+                    const tdStatus = document.createElement('td');
+                    tdStatus.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-300';
+                    
+                    // Simulate online status (random for demo)
+                    const isOnline = Math.random() > 0.3; // 70% chance of being online
+                    if (isOnline) {
+                        tdStatus.innerHTML = '<span class="online-badge"></span> Online';
+                    } else {
+                        tdStatus.innerHTML = '<span class="inline-block w-2 h-2 bg-gray-500 rounded-full mr-2"></span> Offline';
+                    }
+                    tr.appendChild(tdStatus);
 
                     const tdCount = document.createElement('td');
-                    tdCount.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-500';
-                    tdCount.textContent = `${tech.count || 0} configuração${tech.count !== 1 ? 'ões' : ''}`;
+                    tdCount.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-300';
+                    tdCount.textContent = `${tech.count || 0} configuraç${tech.count !== 1 ? 'ões' : ''}`;
                     tr.appendChild(tdCount);
+                    
+                    const tdProgress = document.createElement('td');
+                    tdProgress.className = 'px-6 py-4 whitespace-nowrap';
+                    
+                    const progressContainer = document.createElement('div');
+                    progressContainer.className = 'w-full bg-gray-600 rounded-full h-2.5';
+                    
+                    const progressBar = document.createElement('div');
+                    progressBar.className = 'bg-indigo-500 h-2.5 rounded-full';
+                    progressBar.style.width = `${progress}%`;
+                    
+                    progressContainer.appendChild(progressBar);
+                    tdProgress.appendChild(progressContainer);
+                    tr.appendChild(tdProgress);
 
                     elements.techniciansList.appendChild(tr);
                 });
@@ -1094,6 +1711,14 @@
 
             // Initialize the application
             initEventListeners();
+            initWiFiSymbol();
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                if (state.carouselSlides.length > 0) {
+                    updateCarousel();
+                }
+            });
         });
     </script>
 </body>
